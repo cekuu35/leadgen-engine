@@ -86,8 +86,12 @@ async def main(args):
     for r in enriched:
         r["iletisim_skoru"] = sum(bool(r.get(k)) for k in ("telefon", "website", "email"))
     out = Path(args.out)
+    fieldnames = list(rows[0].keys())
+    for extra in ("zenginlastirme_kaynagi",):
+        if extra not in fieldnames:
+            fieldnames.append(extra)
     with out.open("w", newline="", encoding="utf-8-sig") as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        w = csv.DictWriter(f, fieldnames=fieldnames)
         w.writeheader()
         w.writerows(rows)
     with_email = sum(1 for r in rows if r.get("email"))
