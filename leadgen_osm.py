@@ -53,8 +53,12 @@ def query_overpass(q: str, retries: int = 4) -> list[dict]:
                               headers={"User-Agent": "leadgen-engine/1.0"},
                               timeout=90)
             if r.status_code == 200 and r.text.strip().startswith("{"):
-                return r.json().get("elements", [])
-            last_err = f"{ep} -> HTTP {r.status_code} {r.text[:80]}"
+                data = r.json()
+                if "elements" in data:
+                    return data["elements"]
+                last_err = f"{ep} -> {data.get('remark', 'elements yok')}"
+            else:
+                last_err = f"{ep} -> HTTP {r.status_code} {r.text[:80]}"
         except Exception as e:  # noqa: BLE001
             last_err = f"{ep} -> {e}"
         wait = min(2 ** attempt * 5, 40)
